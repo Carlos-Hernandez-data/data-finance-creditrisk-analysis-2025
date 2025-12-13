@@ -1,0 +1,138 @@
+============================================================
+PROYECTO: Análisis de Riesgo Crediticio — Credit Risk
+ARCHIVO : dax_measures_creditrisk.txt
+AUTOR   : Carlos Hernández Godoy
+AÑO     : 2025
+
+DESCRIPCIÓN:
+  Diccionario de columnas calculadas y medidas DAX utilizadas
+  en el modelo de Power BI para evaluar riesgo de impago,
+  segmentar perfiles y construir un dashboard ejecutivo claro.
+============================================================
+
+
+------------------------------
+SECCIÓN 1 - COLUMNAS CALCULADAS (SEGMENTACIÓN)
+------------------------------
+
+-- Age Group
+-- Agrupa la edad en rangos para análisis por perfil demográfico.
+Age Group =
+VAR a = creditrisk_raw[person_age]
+RETURN
+SWITCH(
+    TRUE(),
+    a < 26, "18-25",
+    a <= 35, "26-35",
+    a <= 45, "36-45",
+    a <= 60, "46-60",
+    "61+"
+)
+
+-- Income Segment
+-- Segmenta ingresos en niveles para comparar riesgo por capacidad económica.
+Income Segment =
+VAR i = creditrisk_raw[person_income]
+RETURN
+SWITCH(
+    TRUE(),
+    i < 30000, "Bajo (<30k)",
+    i <= 60000, "Medio (30k-60k)",
+    "Alto (>60k)"
+)
+
+-- DTI Segment
+-- Segmenta el endeudamiento (loan_percent_income) en niveles.
+-- loan_percent_income es un ratio (0–1). Ej.: 0.25 = 25%.
+DTI Segment =
+VAR p = creditrisk_raw[loan_percent_income]
+RETURN
+SWITCH(
+    TRUE(),
+    p < 0.2, "Bajo (<20%)",
+    p <= 0.4, "Medio (20%-40%)",
+    "Alto (>40%)"
+)
+
+-- Risk Segment
+-- Segmentación ejecutiva de riesgo para lectura rápida.
+-- Alto: alto endeudamiento o historial previo de impago (Y).
+-- Medio: endeudamiento medio sin historial previo (N).
+-- Bajo: resto.
+Risk Segment =
+VAR p = creditrisk_raw[loan_percent_income]
+VAR prior = creditrisk_raw[cb_person_default_on_file]
+RETURN
+SWITCH(
+    TRUE(),
+    p > 0.4 || prior = "Y", "Alto",
+    p >= 0.2 && p <= 0.4 && prior = "N", "Medio",
+    "Bajo"
+)
+
+-- Loan Purpose (ES)
+-- Traducción de la finalidad del préstamo para visualización en español.
+Loan Purpose (ES) =
+SWITCH(
+    creditrisk_raw[loan_intent],
+    "EDUCATION", "Educación",
+    "MEDICAL", "Gastos médicos",
+    "VENTURE", "Emprendimiento",
+    "PERSONAL", "Uso personal",
+    "HOMEIMPROVEMENT", "Mejora del hogar",
+    "DEBTCONSOLIDATION", "Consolidación de deudas",
+    "Otro"
+)
+
+-- Previous Default (Sí/No)
+-- Traducción de historial previo (Y/N) para slicers y lectura en español.
+Previous Default (Sí/No) =
+IF(
+    creditrisk_raw[cb_person_default_on_file] = "Y",
+    "Sí",
+    "No"
+)
+
+
+------------------------------
+SECCIÓN 2 - MEDIDAS BASE (KPIs)
+------------------------------
+
+-- Total Credits
+-- Total de registros (créditos) analizados.
+Total Credits =
+COUNTROWS(creditrisk_raw)
+
+-- Default Credits
+-- Créditos en impago (loan_status = 1).
+Default Credits =
+CALCULATE(
+    COUNTROWS(creditrisk_raw),
+    creditrisk_raw[loan_status] = 1
+)
+
+-- Default Rate
+-- Tasa de impago (métrica central del dashboard).
+Default Rate =
+DIVIDE([Default Credits], [Total Credits])
+
+-- Avg Loan Amount
+-- Monto promedio del préstamo.
+Avg Loan Amount =
+AVERAGE(creditrisk_raw[loan_amnt])
+
+-- Avg Loan % Income
+-- Promedio de deuda sobre ingreso (ratio 0–1, recomendado formatear como %).
+Avg Loan % Income =
+AVERAGE(creditrisk_raw[loan_percent_income])
+
+-- Prior Default %
+-- % de créditos asociados a clientes con historial previo de impago (Y).
+Prior Default % =
+DIVIDE(
+    CALCULATE(
+        COUNTROWS(creditrisk_raw),
+        creditrisk_raw[cb_person_default_on_file] = "Y"
+    ),
+    [Total Credits]
+)
