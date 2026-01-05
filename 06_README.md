@@ -18,7 +18,7 @@ El trabajo integra exploración de datos, definición de métricas clave, segmen
 - Presentar los resultados en un **dashboard ejecutivo** claro y comprensible para usuarios no técnicos.
 
 ## Estructura del repositorio
-
+```
 data-finance-creditrisk-analysis-2025/
 ├── 01_data/ (creditrisk_raw.csv)
 ├── 02_dax/ (dax_measures_creditrisk.txt)
@@ -26,7 +26,7 @@ data-finance-creditrisk-analysis-2025/
 ├── 04_pbix/ (creditrisk_dashboard.pbix)
 ├── 05_sql/ (sql_creditrisk_analysis.sql)
 └── 06_README.md
-
+```
 ## Datos utilizados
 
 - **Fuente:** Credit Risk Dataset (Kaggle)
