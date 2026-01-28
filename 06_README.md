@@ -20,11 +20,11 @@ El trabajo integra exploración de datos, definición de métricas clave, segmen
 ## Estructura del repositorio
 ```
 data-finance-creditrisk-analysis-2025/
-├── 01_data/ (creditrisk_raw.csv)
-├── 02_dax/ (dax_measures_creditrisk.txt)
-├── 03_img/ (executive_dashboard.png)
-├── 04_pbix/ (creditrisk_dashboard.pbix)
-├── 05_sql/ (sql_creditrisk_analysis.sql)
+├── 01_data/creditrisk_raw.csv
+├── 02_dax/dax_measures_creditrisk.txt
+├── 03_img/executive_dashboard.png
+├── 04_pbix/creditrisk_dashboard.pbix
+├── 05_sql/sql_creditrisk_analysis.sql
 └── 06_README.md
 ```
 ## Datos utilizados
